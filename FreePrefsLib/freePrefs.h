@@ -43,7 +43,7 @@ namespace FreePrefsLib {
 
 
 		//	初期化関数。ファイルから設定を読み込む
-		static void Init(const char* path);
+		static void Init(const std::string& path);
 		//	終了関数。設定をファイルに保存して、メモリを解放する
 		static void Uninit();
 	private:

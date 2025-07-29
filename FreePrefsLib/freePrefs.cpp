@@ -10,7 +10,7 @@ namespace FreePrefsLib
 	std::unordered_map<std::string, std::string>Literate::m_StringMap{};
 
 
-	void Literate::Init(const char* path) {
+	void Literate::Init(const std::string& path) {
 		m_filepath = path; //ファイルパスを設定
 		FILE* file = nullptr;
 		fopen_s(&file,m_filepath.c_str(), "rb");
@@ -59,6 +59,9 @@ namespace FreePrefsLib
 	bool  Literate::PrefsSave() {
 		FILE* file = nullptr;
 		fopen_s(&file, m_filepath.c_str(), "wb");
+		if (file == nullptr) {
+			return false; //ファイルが開けなかった場合はfalseを返す
+		}
 
 		//読み込み時を考慮して、データのサイズを最初に書き込む
 		int i, f, s;
@@ -71,18 +74,22 @@ namespace FreePrefsLib
 
 		for (auto& pair : m_IntMap)
 		{
-			fwrite(pair.first.c_str(), sizeof(std::string), 1, file);
+			size_t str_size = pair.first.size();
+			fwrite(pair.first.c_str(), str_size, 1, file);
 			fwrite(&pair.second, sizeof(int), 1, file);
 		}
 		for (auto& pair : m_floatMap)
 		{
-			fwrite(pair.first.c_str(), sizeof(std::string), 1, file);
+			size_t str_size = pair.first.size();
+			fwrite(pair.first.c_str(), str_size, 1, file);
 			fwrite(&pair.second, sizeof(float), 1, file);
 		}
 		for (auto& pair : m_StringMap)
 		{
-			fwrite(pair.first.c_str(), sizeof(std::string), 1, file);
-			fwrite(pair.second.c_str(), sizeof(std::string), 1, file);
+			size_t str_size = pair.first.size();
+			fwrite(pair.first.c_str(), str_size, 1, file);
+			size_t value_size = pair.second.size();
+			fwrite(pair.second.c_str(), value_size, 1, file);
 		}
 		fclose(file);
 		return true;
