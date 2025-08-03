@@ -28,22 +28,38 @@ namespace FreePrefsLib
 		for (int count = 0; count < i; count++)
 		{
 			int data;
-			fread(&key, sizeof(std::string), 1, file);
+			size_t str_size;
+			fread(&str_size, sizeof(str_size), 1, file); // キーのサイズを読み込む
+			std::vector<unsigned char> content(str_size, 0);
+			fread(&content[0], 1, str_size, file); 
+			key = std::string(content.begin(), content.end());
 			fread(&data, sizeof(int), 1, file);
 			m_IntMap[key] = data;
 		}
 		for (int count = 0; count < f; count++)
 		{
 			float data;
-			fread(&key, sizeof(std::string), 1, file);
+			size_t str_size;
+			fread(&str_size, sizeof(str_size), 1, file); // キーのサイズを読み込む
+			std::vector<unsigned char> content(str_size, 0);
+			fread(&content[0], 1, str_size, file); 
+			key = std::string(content.begin(), content.end());
 			fread(&data, sizeof(float), 1, file);
 			m_floatMap[key] = data;
 		}
 		for (int count = 0; count < s; count++)
 		{
 			std::string data;
-			fread(&key, sizeof(std::string), 1, file);
-			fread(&data, sizeof(std::string), 1, file);
+			size_t str_size;
+			fread(&str_size, sizeof(str_size), 1, file); // キーのサイズを読み込む
+			std::vector<unsigned char> content(str_size, 0);
+			fread(&content[0], 1, str_size, file); // ファイル名を読み込む
+			key = std::string(content.begin(), content.end());
+
+			fread(&str_size, sizeof(str_size), 1, file); // データのサイズを読み込む
+			std::vector<unsigned char> dataSize(str_size, 0);
+			fread(&dataSize[0], 1, str_size, file); 
+			data = std::string(dataSize.begin(), dataSize.end());
 			m_StringMap[key] = data;
 		}
 		fclose(file);
@@ -75,20 +91,25 @@ namespace FreePrefsLib
 		for (auto& pair : m_IntMap)
 		{
 			size_t str_size = pair.first.size();
+			//データ書き込み
+			fwrite(&str_size, sizeof(str_size), 1, file); 
 			fwrite(pair.first.c_str(), str_size, 1, file);
 			fwrite(&pair.second, sizeof(int), 1, file);
 		}
 		for (auto& pair : m_floatMap)
 		{
 			size_t str_size = pair.first.size();
+			fwrite(&str_size, sizeof(str_size), 1, file); 
 			fwrite(pair.first.c_str(), str_size, 1, file);
 			fwrite(&pair.second, sizeof(float), 1, file);
 		}
 		for (auto& pair : m_StringMap)
 		{
 			size_t str_size = pair.first.size();
+			fwrite(&str_size, sizeof(str_size), 1, file);
 			fwrite(pair.first.c_str(), str_size, 1, file);
 			size_t value_size = pair.second.size();
+			fwrite(&value_size, sizeof(value_size), 1, file); 
 			fwrite(pair.second.c_str(), value_size, 1, file);
 		}
 		fclose(file);
